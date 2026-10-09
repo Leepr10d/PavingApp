@@ -1,0 +1,868 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Driveway Quote Prototype</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600&display=swap">
+<style>
+/* Layout: one phone-width column, one screen at a time, big tap targets, actions pinned to the end of each screen. */
+:root {
+  --ground: #F2F3F0;
+  --surface: #FFFFFF;
+  --ink: #1B1D1F;
+  --muted: #565B60;
+  --line: #D0D4CC;
+  --paint: #F5B700;
+  --on-paint: #1B1D1F;
+  --sketch: #1257C8;
+  --sketch-fill: rgba(18, 87, 200, 0.12);
+  --grid: #E4E7E1;
+  --danger: #B3261E;
+  --bar: #1B1D1F;
+  --on-bar: #FFFFFF;
+  --scrim: rgba(0, 0, 0, 0.55);
+  --display: 'Barlow Semi Condensed', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+  --body: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #141617; --surface: #1F2224; --ink: #F2F3F0; --muted: #A9AEB3; --line: #3A3F43;
+    --paint: #F5B700; --on-paint: #1B1D1F; --sketch: #6FA5F5; --sketch-fill: rgba(111, 165, 245, 0.16);
+    --grid: #2A2E31; --danger: #F2857E; --bar: #2E3336; --on-bar: #F2F3F0; --scrim: rgba(0, 0, 0, 0.65);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #141617; --surface: #1F2224; --ink: #F2F3F0; --muted: #A9AEB3; --line: #3A3F43;
+  --paint: #F5B700; --on-paint: #1B1D1F; --sketch: #6FA5F5; --sketch-fill: rgba(111, 165, 245, 0.16);
+  --grid: #2A2E31; --danger: #F2857E; --bar: #2E3336; --on-bar: #F2F3F0; --scrim: rgba(0, 0, 0, 0.65);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--ground); color: var(--ink); font: 400 18px/1.35 var(--body); -webkit-text-size-adjust: 100%; }
+#app { max-width: 480px; min-height: 100%; margin: 0 auto; padding-inline: 16px; padding-block: 14px 20px; display: flex; flex-direction: column; gap: 14px; }
+h1 { margin: 0; font: 600 34px/1.05 var(--display); text-wrap: balance; }
+h2 { margin: 0; }
+p { margin: 0; }
+button { font-family: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--sketch); outline-offset: 2px; }
+.muted { color: var(--muted); }
+.sec { font: 600 15px var(--body); color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+.eyebrow { font-size: 16px; color: var(--muted); }
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 58px; width: 100%; padding: 0 16px; border: 2px solid var(--ink); border-radius: 14px; background: var(--surface); color: var(--ink); font: 600 20px var(--body); }
+.btn.primary { background: var(--paint); border-color: var(--paint); color: var(--on-paint); }
+.btn.dark { background: var(--bar); border-color: var(--bar); color: var(--on-bar); width: auto; min-height: 52px; font-size: 18px; }
+.btn.on { background: var(--paint); color: var(--on-paint); }
+.btn.text { border-color: transparent; background: transparent; color: var(--danger); min-height: 52px; font-size: 18px; }
+.btn.quiet { border-color: transparent; background: transparent; color: var(--muted); min-height: 52px; font-size: 17px; }
+.bar { display: flex; align-items: center; gap: 8px; }
+.bar h1 { flex: 1; min-width: 0; font-size: 28px; overflow-wrap: anywhere; }
+.icon { flex: none; width: 52px; height: 52px; margin-left: -10px; border: 0; border-radius: 12px; background: transparent; display: grid; place-items: center; }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.list { display: flex; flex-direction: column; gap: 8px; }
+.job { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 84px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; text-align: left; font: inherit; }
+.job.open { border: 2px solid var(--ink); }
+.job .mid { flex: 1; min-width: 0; }
+.job .nm { font-size: 20px; font-weight: 600; overflow-wrap: anywhere; }
+.job .sub { font-size: 16px; color: var(--muted); }
+.job .rt { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.amt { font: 600 23px var(--display); font-variant-numeric: tabular-nums; }
+.chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 6px; font-size: 15px; font-weight: 600; }
+.chip.open { padding: 2px 10px; background: var(--paint); color: var(--on-paint); }
+.chip.big { min-height: 52px; padding: 0 16px; border-radius: 12px; font-size: 18px; }
+.chip.locked { color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.shape { display: block; }
+.shape polygon { fill: var(--sketch-fill); stroke: var(--sketch); stroke-width: 2; stroke-linejoin: round; }
+.shape circle { fill: var(--sketch); }
+.shape text { font: 600 13px var(--body); fill: var(--ink); stroke: var(--surface); stroke-width: 4px; paint-order: stroke; }
+.wide { width: 100%; height: auto; }
+.cv { position: relative; height: 430px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+.cv > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.g-line { fill: none; stroke: var(--grid); stroke-width: 1; }
+.poly { fill: var(--sketch-fill); stroke: var(--sketch); stroke-width: 2.5; stroke-linejoin: round; }
+.sq { fill: none; stroke: var(--sketch); stroke-width: 1.5; }
+.seledge { stroke: var(--ink); stroke-width: 5; stroke-linecap: round; }
+.pin { fill: var(--surface); stroke: var(--sketch); stroke-width: 4; }
+.pin.sel { fill: var(--paint); stroke: var(--ink); }
+.hit { fill: transparent; pointer-events: all; cursor: grab; }
+.dim { position: absolute; transform: translate(-50%, -50%); min-height: 36px; padding: 0 10px; border: 1.5px solid var(--sketch); border-radius: 8px; background: var(--surface); color: var(--sketch); font: 600 16px var(--body); white-space: nowrap; }
+.dim.sel { border: 2px solid var(--ink); background: var(--paint); color: var(--on-paint); }
+.zoom { flex: none; display: flex; gap: 6px; }
+.zoom button { width: 52px; height: 52px; padding: 0; border: 2px solid var(--ink); border-radius: 12px; background: var(--surface); font: 600 24px/1 var(--display); }
+.zoom .fit { font: 600 17px var(--body); }
+.gridlbl { position: absolute; left: 10px; bottom: 8px; font-size: 13px; color: var(--muted); pointer-events: none; }
+.row4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.row4 .btn { padding: 0 2px; font-size: 16px; }
+.starter { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 20px; background: var(--surface); }
+.starter h2 { font: 600 26px/1.1 var(--display); }
+.starter .btn { justify-content: flex-start; gap: 14px; min-height: 68px; }
+.starter svg { flex: none; fill: var(--sketch-fill); stroke: var(--sketch); stroke-width: 2; stroke-linejoin: round; }
+.mline { stroke: var(--ink); stroke-width: 3; stroke-dasharray: 9 6; pointer-events: none; }
+.mpt { fill: var(--ink); stroke: var(--surface); stroke-width: 2; pointer-events: none; }
+.mlabel { position: absolute; transform: translate(-50%, -50%); padding: 4px 12px; border-radius: 8px; background: var(--bar); color: var(--on-bar); font: 600 18px var(--body); white-space: nowrap; pointer-events: none; }
+.cv.measuring { cursor: crosshair; }
+.cv.measuring .dim { pointer-events: none; opacity: 0.55; }
+.cv.measuring .hit { cursor: crosshair; }
+.ctx.tall { flex-wrap: wrap; gap: 8px; }
+.ctx.tall .fld { flex: 1 1 20%; }
+.ctx.tall .btn { flex: 1 1 100%; }
+.ctx .read { align-self: center; }
+.ctx { min-height: 84px; display: flex; align-items: flex-end; gap: 10px; }
+.ctx .hint { align-self: center; font-size: 17px; color: var(--muted); }
+.ctx .warn { color: var(--danger); font-weight: 600; }
+.ctx .setbtn { flex: 0 0 92px; width: 92px; }
+.fld { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; font-size: 15px; color: var(--muted); }
+.inp { width: 100%; height: 58px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 12px; background: var(--surface); color: var(--ink); font: 600 24px var(--display); }
+textarea.inp { height: auto; padding: 12px; font: 400 18px/1.4 var(--body); resize: vertical; }
+.inp.name { font: 600 20px var(--body); }
+.act { margin-top: auto; padding-top: 6px; display: flex; flex-direction: column; gap: 8px; }
+.act.split { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
+.act.split .btn { width: auto; padding: 0 26px; }
+.big { font: 600 34px/1.1 var(--display); }
+.pad { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.linehead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 19px; font-weight: 600; }
+.step { display: flex; align-items: center; gap: 10px; }
+.step button { flex: none; width: 64px; height: 64px; padding: 0; border: 2px solid var(--ink); border-radius: 12px; background: var(--surface); font: 600 32px/1 var(--display); }
+.step .val { flex: 1; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--ground); border-radius: 12px; }
+.step .val .rline { display: flex; align-items: center; justify-content: center; gap: 3px; font: 600 28px/1 var(--display); }
+.step .val .rate { width: 86px; height: 36px; padding: 0; border: 0; border-bottom: 2px solid var(--ink); border-radius: 0; background: transparent; color: var(--ink); text-align: center; font: 600 28px/1 var(--display); font-variant-numeric: tabular-nums; }
+.step .val > span { font-size: 14px; color: var(--muted); }
+.step .val { height: 68px; }
+.svc small { display: block; font-size: 14px; font-weight: 500; }
+.mrow { display: flex; align-items: center; gap: 8px; }
+.mrow label { flex: 1; font-size: 20px; font-weight: 600; }
+.mrow .cur { font-size: 22px; font-weight: 600; }
+.mrow .inp { width: 150px; text-align: right; }
+.total { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px; background: var(--bar); color: var(--on-bar); border-radius: 14px; font-size: 20px; font-weight: 600; }
+.total strong { font: 600 44px/1 var(--display); color: var(--paint); font-variant-numeric: tabular-nums; }
+.items > div { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 18px; }
+.items > div:last-child { border-bottom: 0; }
+.items small { display: block; font-size: 15px; color: var(--muted); }
+.items .amt { font-size: 22px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.svc { min-height: 56px; padding: 0 18px; border: 2px solid var(--ink); border-radius: 12px; background: var(--surface); font: 600 18px var(--body); }
+.svc.on { background: var(--paint); color: var(--on-paint); }
+.svc.new { border-style: dashed; background: transparent; }
+.cbar { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 0 14px; background: var(--bar); color: var(--on-bar); border-radius: 12px; font-size: 16px; }
+.cbar button { min-height: 52px; padding: 0 12px; border: 0; background: transparent; color: var(--paint); font: 600 18px var(--body); }
+.drive { display: flex; align-items: center; gap: 18px; padding: 16px; }
+.done { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 16px; border: 2px solid var(--ink); border-radius: 14px; background: var(--surface); font-size: 19px; font-weight: 600; }
+.scrim { position: fixed; inset: 0; z-index: 10; display: flex; align-items: flex-end; justify-content: center; background: var(--scrim); }
+.sheet { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 10px; padding: 22px 16px calc(24px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-radius: 20px 20px 0 0; }
+.sheet h2 { font: 600 28px/1.1 var(--display); }
+.sheet p { font-size: 18px; color: var(--muted); }
+.empty { padding: 18px 14px; color: var(--muted); }
+</style>
+
+<div id="app"></div>
+<div id="sheetHost"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var KEY = 'driveway-quote-proto-v1';
+  var app = document.getElementById('app');
+  var sheetHost = document.getElementById('sheetHost');
+
+  /* ---------- storage ---------- */
+  function load() {
+    try { var t = localStorage.getItem(KEY); if (t) { return JSON.parse(t); } } catch (e) {}
+    return null;
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {}
+  }
+  function today() {
+    var d = new Date();
+    var m = d.getMonth() + 1, day = d.getDate();
+    return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day;
+  }
+  function seed() {
+    return {
+      nextId: 3,
+      services: [
+        { id: 's1', name: 'Sealcoating', cents: 35, words: 'Clean the driveway and apply two coats of sealer.' },
+        { id: 's2', name: 'Refinishing', cents: 65, words: 'Clean the driveway, fill cracks, and apply a new top coat.' }
+      ],
+      jobs: [
+        {
+          id: 'j1', name: 'Sample: 412 Maple St', date: today(),
+          pins: [{ x: 0, y: 0 }, { x: 24, y: 0 }, { x: 24, y: 18 }, { x: 12, y: 18 }, { x: 12, y: 44 }, { x: 16, y: 50 }, { x: -4, y: 50 }, { x: 0, y: 44 }],
+          svcId: 's1', svcName: 'Sealcoating', words: 'Clean the driveway and apply two coats of sealer.',
+          cents: 35, labor: '120', expenses: '45', extra: '25', locked: false, accepted: false
+        },
+        {
+          id: 'j2', name: 'Sample: 88 Ridge Rd', date: today(),
+          pins: [{ x: 0, y: 0 }, { x: 30, y: 0 }, { x: 30, y: 42 }, { x: 0, y: 42 }],
+          svcId: 's1', svcName: 'Sealcoating', words: 'Clean the driveway and apply two coats of sealer.',
+          cents: 35, labor: '145', expenses: '', extra: '', locked: true, accepted: false
+        }
+      ]
+    };
+  }
+
+  var store = load() || seed();
+  var ui = { screen: 'jobs', jobId: null, draft: null, dirty: false };
+  var ed = null;
+
+  /* ---------- helpers ---------- */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function num(v) { var x = parseFloat(v); return isFinite(x) && x > 0 ? x : 0; }
+  function money(n) { return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmtDate(iso, year) {
+    var d = new Date(iso + 'T12:00:00');
+    if (isNaN(d.getTime())) { return ''; }
+    return d.toLocaleDateString('en-US', year ? { month: 'short', day: 'numeric', year: 'numeric' } : { month: 'short', day: 'numeric' });
+  }
+  function signedArea(p) {
+    var s = 0, n = p.length;
+    for (var i = 0; i < n; i++) { var a = p[i], b = p[(i + 1) % n]; s += a.x * b.y - b.x * a.y; }
+    return s / 2;
+  }
+  function areaOf(p) { return p.length < 3 ? 0 : Math.abs(signedArea(p)); }
+  function lenParts(ft) {
+    var inches = Math.round(ft * 12);
+    return { ft: Math.floor(inches / 12), inch: inches % 12 };
+  }
+  function lenText(ft) {
+    var p = lenParts(ft);
+    return p.inch ? p.ft + ' ft ' + p.inch + ' in' : p.ft + ' ft';
+  }
+  function areaText(a) { return Math.round(a).toLocaleString('en-US') + ' sq ft'; }
+  function totals(j) {
+    var area = Math.round(areaOf(j.pins));
+    var line = Math.round(area * j.cents) / 100;
+    return { area: area, line: line, total: line + num(j.labor) + num(j.expenses) + num(j.extra) };
+  }
+  function findJob(id) {
+    for (var i = 0; i < store.jobs.length; i++) { if (store.jobs[i].id === id) { return store.jobs[i]; } }
+    return null;
+  }
+  function findSvc(id) {
+    for (var i = 0; i < store.services.length; i++) { if (store.services[i].id === id) { return store.services[i]; } }
+    return null;
+  }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function $(id) { return document.getElementById(id); }
+
+  var ICON_BACK = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>';
+  function lockIcon(size, open) {
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="' + (open ? 'M8 11V7a4 4 0 0 1 7.6-1.8' : 'M8 11V7a4 4 0 0 1 8 0v4') + '"></path></svg>';
+  }
+  var ICON_CHECK = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>';
+
+  /* Read-only drawing of a shape, fitted to W x H. */
+  function shapeSVG(pins, W, H, dims, cls) {
+    var open = '<svg class="shape ' + (cls || '') + '" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="Driveway shape">';
+    if (pins.length < 3) { return open + '</svg>'; }
+    var minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+    pins.forEach(function (p) { minx = Math.min(minx, p.x); miny = Math.min(miny, p.y); maxx = Math.max(maxx, p.x); maxy = Math.max(maxy, p.y); });
+    var bw = Math.max(maxx - minx, 0.5), bh = Math.max(maxy - miny, 0.5);
+    var pad = dims ? 58 : 5;
+    var s = Math.min((W - 2 * pad) / bw, (H - 2 * pad) / bh);
+    var ox = (W - bw * s) / 2 - minx * s, oy = (H - bh * s) / 2 - miny * s;
+    var sp = pins.map(function (p) { return { x: ox + p.x * s, y: oy + p.y * s }; });
+    var out = open + '<polygon points="' + sp.map(function (p) { return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ') + '"></polygon>';
+    if (dims) {
+      var sign = signedArea(pins) >= 0 ? 1 : -1;
+      sp.forEach(function (a, i) {
+        var b = sp[(i + 1) % sp.length];
+        var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1;
+        var nx = sign * dy / L, ny = -sign * dx / L;
+        var q = pins[(i + 1) % pins.length], p = pins[i];
+        var txt = lenText(Math.hypot(q.x - p.x, q.y - p.y));
+        var dist = 8 + txt.length * 3.3 * Math.abs(nx) + 8 * Math.abs(ny);
+        var tx = (a.x + b.x) / 2 + nx * dist, ty = (a.y + b.y) / 2 + ny * dist;
+        out += '<text x="' + tx.toFixed(1) + '" y="' + ty.toFixed(1) + '" text-anchor="middle" dominant-baseline="central">' + txt + '</text>';
+      });
+      sp.forEach(function (p) { out += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="4"></circle>'; });
+    }
+    return out + '</svg>';
+  }
+
+  /* ---------- sheet (in-page confirm) ---------- */
+  var sheetYes = null;
+  function sheet(title, text, yesLabel, noLabel, onYes) {
+    sheetYes = onYes;
+    sheetHost.innerHTML = '<div class="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">' +
+      '<h2 id="sheetTitle">' + esc(title) + '</h2><p>' + esc(text) + '</p>' +
+      '<button class="btn primary" id="sheetYes" data-act="sheet-yes">' + esc(yesLabel) + '</button>' +
+      '<button class="btn" data-act="sheet-no">' + esc(noLabel) + '</button></div></div>';
+    var y = $('sheetYes'); if (y) { y.focus(); }
+  }
+  function closeSheet() { sheetHost.innerHTML = ''; sheetYes = null; }
+
+  /* ---------- screens ---------- */
+  function go(screen) { ui.screen = screen; render(); window.scrollTo(0, 0); }
+
+  function render() {
+    if (ui.screen === 'jobs') { app.innerHTML = jobsHTML(); }
+    else if (ui.screen === 'services') { app.innerHTML = servicesHTML(); }
+    else if (ui.screen === 'sketch') { app.innerHTML = sketchHTML(); initSketch(); }
+    else if (ui.screen === 'price') { app.innerHTML = priceHTML(); }
+    else if (ui.screen === 'view') { app.innerHTML = viewHTML(); }
+    else if (ui.screen === 'quote') { app.innerHTML = quoteHTML(); }
+  }
+
+  function jobRow(j) {
+    var t = totals(j);
+    return '<button class="job' + (j.locked ? '' : ' open') + '" data-act="open" data-id="' + esc(j.id) + '">' +
+      shapeSVG(j.pins, 52, 52, false) +
+      '<span class="mid"><span class="nm">' + esc(j.name) + '</span><br><span class="sub">' + esc(fmtDate(j.date)) + ' · ' + areaText(t.area) + '</span></span>' +
+      '<span class="rt"><span class="amt">' + money(t.total) + '</span>' +
+      (j.locked ? '<span class="chip locked">' + lockIcon(16) + 'Locked</span>' : '<span class="chip open">Open</span>') +
+      '</span></button>';
+  }
+  function jobsHTML() {
+    var open = store.jobs.filter(function (j) { return !j.locked; });
+    var locked = store.jobs.filter(function (j) { return j.locked; });
+    return '<header><p class="eyebrow">[Company name]</p><h1>Jobs</h1></header>' +
+      '<div class="row2"><button class="btn primary" data-act="new">+ New job</button><button class="btn" data-act="services">Services</button></div>' +
+      '<h2 class="sec">Open</h2><div class="list">' + (open.length ? open.map(jobRow).join('') : '<p class="card empty">No open jobs. Tap New job to start one.</p>') + '</div>' +
+      '<h2 class="sec">Locked</h2><div class="list">' + (locked.length ? locked.map(jobRow).join('') : '<p class="card empty">No locked jobs yet. Lock a job from its page.</p>') + '</div>' +
+      '<div class="act"><button class="btn quiet" data-act="reset">Reset sample data</button></div>';
+  }
+
+  function servicesHTML() {
+    if (!findSvc(ui.svcId)) { ui.svcId = store.services[0].id; }
+    var s = findSvc(ui.svcId);
+    return '<header class="bar"><button class="icon" data-act="home" aria-label="Back to jobs">' + ICON_BACK + '</button><h1>Services</h1></header>' +
+      '<div class="chips">' + store.services.map(function (x) {
+        return '<button class="svc' + (x.id === s.id ? ' on' : '') + '" data-act="svc-pick" data-id="' + esc(x.id) + '">' + esc(x.name || 'New service') + '</button>';
+      }).join('') + '<button class="svc new" data-act="svc-new">+ New</button></div>' +
+      '<div class="card pad">' +
+      '<label class="fld" for="svcName">Name<input class="inp name" id="svcName" data-f="svcName" type="text" autocomplete="off" value="' + esc(s.name) + '"></label>' +
+      '<div class="fld">Price per square foot<div class="step"><button data-act="svc-down" aria-label="Lower price by 5 cents">−</button>' + rateBox('svcPrice', s.cents) + '<button data-act="svc-up" aria-label="Raise price by 5 cents">+</button></div></div>' +
+      '<label class="fld" for="svcWords">Wording on the quote<textarea class="inp" id="svcWords" data-f="svcWords" rows="4">' + esc(s.words) + '</textarea></label>' +
+      '</div>' +
+      '<p class="muted">Pick a service on a job and its price and wording fill in.</p>' +
+      '<div class="act">' + (store.services.length > 1 ? '<button class="btn text" data-act="svc-del">Delete this service</button>' : '') +
+      '<button class="btn primary" data-act="home">Done</button></div>';
+  }
+
+  /* The typed price box used inside a preset, on both the Services and Price screens. */
+  function rateBox(id, cents) {
+    return '<div class="val"><div class="rline"><span>$</span><input class="rate" id="' + id + '" data-f="' + id + '" type="text" inputmode="decimal" autocomplete="off" aria-label="Price per square foot in dollars" value="' + (cents / 100).toFixed(2) + '"></div><span>per sq ft</span></div>';
+  }
+  function rateLabel(cents) { return money(cents / 100) + ' / sq ft'; }
+
+  function sketchHTML() {
+    return '<header class="bar"><button class="icon" data-act="sketch-back" aria-label="Back">' + ICON_BACK + '</button><h1>Sketch</h1>' +
+      '<div class="zoom"><button data-act="zoom-out" aria-label="Zoom out">−</button><button data-act="zoom-in" aria-label="Zoom in">+</button><button class="fit" data-act="zoom-fit">Fit</button></div></header>' +
+      '<div class="cv" id="cv"><svg id="sv" aria-label="Driveway sketch"></svg><div id="labels"></div>' +
+      '<span class="gridlbl" id="gridLbl"></span>' +
+      '<div class="starter" id="starter"><h2>Start with a shape</h2>' +
+      '<button class="btn" data-act="tpl-rect"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="8" y="3" width="18" height="28"></rect></svg>Rectangle</button>' +
+      '<button class="btn" data-act="tpl-l"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><polygon points="4,3 30,3 30,15 17,15 17,31 4,31"></polygon></svg>L-shape</button>' +
+      '<button class="btn" data-act="tpl-own"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="8" cy="8" r="4"></circle><circle cx="26" cy="12" r="4"></circle><circle cx="14" cy="27" r="4"></circle></svg>Draw with pins</button></div></div>' +
+      '<div class="ctx" id="ctx"></div>' +
+      '<div class="row4"><button class="btn" id="addBtn" data-act="add-mode">Add pin</button><button class="btn" id="measBtn" data-act="measure-mode">Measure</button><button class="btn" data-act="undo">Undo</button><button class="btn" data-act="clear">Clear</button></div>' +
+      '<div class="act split"><div><div class="muted" style="font-size:15px">Area</div><div class="big" id="areaOut">0 sq ft</div></div><button class="btn primary" data-act="to-price">Price it</button></div>';
+  }
+
+  function priceHTML() {
+    var d = ui.draft, t = totals(d);
+    return '<header class="bar"><button class="icon" data-act="to-sketch" aria-label="Back to sketch">' + ICON_BACK + '</button><h1>Price</h1></header>' +
+      '<label class="fld" for="jobName">Job name<input class="inp name" id="jobName" data-f="jobName" type="text" autocomplete="off" placeholder="Address or customer" value="' + esc(d.name) + '"></label>' +
+      '<div class="fld">Service<div class="chips">' + store.services.map(function (x) {
+        return '<button class="svc' + (x.id === d.svcId ? ' on' : '') + '" data-act="job-svc" data-id="' + esc(x.id) + '">' + esc(x.name || 'New service') + '<small>' + rateLabel(x.cents) + '</small></button>';
+      }).join('') + '</div></div>' +
+      '<div class="card pad"><div class="linehead"><span>' + areaText(t.area) + ' × ' + esc(d.svcName) + ' price</span><span class="amt" id="lineAmt">' + money(t.line) + '</span></div>' +
+      '<div class="step"><button data-act="rate-down" aria-label="Lower price by 5 cents">−</button>' + rateBox('jobRate', d.cents) + '<button data-act="rate-up" aria-label="Raise price by 5 cents">+</button></div>' +
+      (findSvc(d.svcId) ? '<p class="muted" style="font-size:15px">Changing this price saves it to the ' + esc(d.svcName) + ' preset.</p>' : '') + '</div>' +
+      moneyRow('labor', 'Labor', d.labor) + moneyRow('expenses', 'Expenses', d.expenses) + moneyRow('extra', 'Extra', d.extra) +
+      '<div class="total"><span>Total</span><strong id="totalAmt">' + money(t.total) + '</strong></div>' +
+      '<div class="act"><button class="btn primary" data-act="save-job">Save job</button></div>';
+  }
+  function moneyRow(id, label, val) {
+    return '<div class="mrow"><label for="' + id + '">' + label + '</label><span class="cur">$</span><input class="inp" id="' + id + '" data-f="' + id + '" type="text" inputmode="decimal" autocomplete="off" placeholder="0" value="' + esc(val) + '"></div>';
+  }
+
+  function itemsHTML(j, t) {
+    var rows = '<div><span>' + esc(j.svcName) + '<small>' + areaText(t.area) + ' × ' + money(j.cents / 100) + '</small></span><span class="amt">' + money(t.line) + '</span></div>';
+    [['Labor', j.labor], ['Expenses', j.expenses], ['Extra', j.extra]].forEach(function (r) {
+      if (num(r[1]) > 0) { rows += '<div><span>' + r[0] + '</span><span class="amt">' + money(num(r[1])) + '</span></div>'; }
+    });
+    return '<div class="card items">' + rows + '</div>';
+  }
+
+  function viewHTML() {
+    var j = findJob(ui.jobId);
+    if (!j) { ui.screen = 'jobs'; return jobsHTML(); }
+    var t = totals(j);
+    return '<header class="bar"><button class="icon" data-act="home" aria-label="Back to jobs">' + ICON_BACK + '</button><h1>' + esc(j.name) + '</h1>' +
+      (j.locked ? '<button class="btn dark" data-act="ask-unlock">' + lockIcon(20) + 'Locked</button>' : '<span class="chip open big">Open</span>') + '</header>' +
+      '<div class="card">' + shapeSVG(j.pins, 358, 250, true, 'wide') + '</div>' +
+      itemsHTML(j, t) +
+      '<div class="total"><span>Total</span><strong>' + money(t.total) + '</strong></div>' +
+      '<div class="act"><button class="btn primary" data-act="show-quote">Show customer quote</button>' +
+      (j.locked
+        ? '<p class="muted" style="text-align:center;padding:8px 0">Tap Locked to unlock and edit this job.</p>'
+        : '<div class="row2"><button class="btn" data-act="edit-sketch">Edit sketch</button><button class="btn" data-act="edit-price">Edit price</button></div>' +
+          '<button class="btn" data-act="lock">' + lockIcon(20) + 'Lock job</button>' +
+          '<button class="btn text" data-act="ask-delete">Delete job</button>') +
+      '</div>';
+  }
+
+  function quoteHTML() {
+    var j = findJob(ui.jobId);
+    if (!j) { ui.screen = 'jobs'; return jobsHTML(); }
+    var t = totals(j);
+    return '<div class="cbar"><span>Customer view</span><button data-act="close-quote">Close</button></div>' +
+      '<div><p style="font-size:20px;font-weight:600">[Company name]</p><p class="muted">[Phone number]</p></div>' +
+      '<div><h1 style="font-size:42px">Your quote</h1><p>' + esc(j.name) + ' · ' + esc(fmtDate(j.date, true)) + '</p></div>' +
+      '<div class="card drive">' + shapeSVG(j.pins, 110, 150, false) + '<div><p class="muted">Your driveway</p><p class="big">' + areaText(t.area) + '</p><p class="muted">Measured on site</p></div></div>' +
+      '<div><h2 style="font-size:22px">' + esc(j.svcName) + '</h2><p>' + esc(j.words) + '</p></div>' +
+      itemsHTML(j, t) +
+      '<div class="total"><span>Total</span><strong>' + money(t.total) + '</strong></div>' +
+      (j.accepted
+        ? '<div class="done">' + ICON_CHECK + '<span>Accepted. We will call you to set a date.</span></div>'
+        : '<button class="btn primary" data-act="accept" style="min-height:66px;font-size:22px">' + ICON_CHECK + 'Accept quote</button>');
+  }
+
+  /* ---------- sketch editor ---------- */
+  function pins() { return ui.draft.pins; }
+  function pushUndo(snapshot) {
+    ed.undo.push(snapshot || clone(pins()));
+    if (ed.undo.length > 60) { ed.undo.shift(); }
+    ui.dirty = true;
+  }
+  function edgeCount() { var n = pins().length; return n >= 3 ? n : Math.max(n - 1, 0); }
+
+  function initSketch() {
+    var cv = $('cv');
+    ed = { undo: [], sel: null, mode: 'move', tpl: null, note: '', m: null, view: { s: 7, ox: 60, oy: 60 }, g: null, msg: '' };
+    fitView();
+    cv.addEventListener('pointerdown', onDown);
+    cv.addEventListener('pointermove', onMove);
+    cv.addEventListener('pointerup', onUp);
+    cv.addEventListener('pointercancel', function () { ed.g = null; });
+    draw(); drawCtx();
+  }
+  function cvSize() { var cv = $('cv'); return { W: cv.clientWidth || 358, H: cv.clientHeight || 430 }; }
+  function fitView() {
+    var p = pins(), z = cvSize();
+    if (!p.length) { ed.view = { s: 7, ox: 60, oy: 60 }; return; }
+    var minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+    p.forEach(function (q) { minx = Math.min(minx, q.x); miny = Math.min(miny, q.y); maxx = Math.max(maxx, q.x); maxy = Math.max(maxy, q.y); });
+    var bw = Math.max(maxx - minx, 4), bh = Math.max(maxy - miny, 4);
+    var s = Math.max(2.5, Math.min(14, Math.min((z.W - 180) / bw, (z.H - 130) / bh)));
+    ed.view = { s: s, ox: (z.W - bw * s) / 2 - minx * s, oy: (z.H - bh * s) / 2 - miny * s };
+  }
+  function zoomBy(f) {
+    var z = cvSize(), v = ed.view, s2 = Math.max(2.5, Math.min(20, v.s * f));
+    var wx = (z.W / 2 - v.ox) / v.s, wy = (z.H / 2 - v.oy) / v.s;
+    ed.view = { s: s2, ox: z.W / 2 - wx * s2, oy: z.H / 2 - wy * s2 };
+    draw();
+  }
+  function toScreen(p) { return { x: ed.view.ox + p.x * ed.view.s, y: ed.view.oy + p.y * ed.view.s }; }
+  function toWorld(p) {
+    return { x: Math.round(((p.x - ed.view.ox) / ed.view.s) * 2) / 2, y: Math.round(((p.y - ed.view.oy) / ed.view.s) * 2) / 2 };
+  }
+  function mod(a, m) { return ((a % m) + m) % m; }
+  function segDist(p, a, b) {
+    var dx = b.x - a.x, dy = b.y - a.y, L2 = dx * dx + dy * dy;
+    var t = L2 ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / L2)) : 0;
+    return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+  }
+  function nearestEdge(sp, limit) {
+    var p = pins().map(toScreen), best = -1, bd = limit;
+    for (var i = 0; i < edgeCount(); i++) {
+      var d = segDist(sp, p[i], p[(i + 1) % p.length]);
+      if (d <= bd) { bd = d; best = i; }
+    }
+    return best;
+  }
+
+  function draw() {
+    var p = pins(), n = p.length, v = ed.view, z = cvSize();
+    var sp = p.map(toScreen);
+    var ft = v.s >= 5 ? 2 : 10, step = ft * v.s;
+    var h = '<defs><pattern id="gp" width="' + step + '" height="' + step + '" patternUnits="userSpaceOnUse" x="' + mod(v.ox, step) + '" y="' + mod(v.oy, step) + '"><path class="g-line" d="M' + step + ' 0H0V' + step + '"></path></pattern></defs>' +
+      '<rect x="0" y="0" width="' + z.W + '" height="' + z.H + '" fill="url(#gp)"></rect>';
+    var pts = sp.map(function (q) { return q.x.toFixed(1) + ',' + q.y.toFixed(1); }).join(' ');
+    if (n >= 3) { h += '<polygon class="poly" points="' + pts + '"></polygon>'; }
+    else if (n === 2) { h += '<polyline class="poly" points="' + pts + '"></polyline>'; }
+    if (n >= 3) {
+      var d = '';
+      for (var k = 0; k < n; k++) {
+        var a = sp[(k + n - 1) % n], c = sp[k], b = sp[(k + 1) % n];
+        var l1 = Math.hypot(a.x - c.x, a.y - c.y), l2 = Math.hypot(b.x - c.x, b.y - c.y);
+        if (l1 < 20 || l2 < 20) { continue; }
+        var u1 = { x: (a.x - c.x) / l1, y: (a.y - c.y) / l1 }, u2 = { x: (b.x - c.x) / l2, y: (b.y - c.y) / l2 };
+        if (Math.abs(u1.x * u2.x + u1.y * u2.y) < 0.0175) {
+          var m = 13;
+          d += 'M' + (c.x + u1.x * m).toFixed(1) + ' ' + (c.y + u1.y * m).toFixed(1) + 'L' + (c.x + (u1.x + u2.x) * m).toFixed(1) + ' ' + (c.y + (u1.y + u2.y) * m).toFixed(1) + 'L' + (c.x + u2.x * m).toFixed(1) + ' ' + (c.y + u2.y * m).toFixed(1);
+        }
+      }
+      if (d) { h += '<path class="sq" d="' + d + '"></path>'; }
+    }
+    var selE = ed.sel && ed.sel.type === 'edge' && ed.sel.i < edgeCount() ? ed.sel.i : -1;
+    var selP = ed.sel && ed.sel.type === 'pin' && ed.sel.i < n ? ed.sel.i : -1;
+    if (selE >= 0) {
+      var e1 = sp[selE], e2 = sp[(selE + 1) % n];
+      h += '<line class="seledge" x1="' + e1.x.toFixed(1) + '" y1="' + e1.y.toFixed(1) + '" x2="' + e2.x.toFixed(1) + '" y2="' + e2.y.toFixed(1) + '"></line>';
+    }
+    sp.forEach(function (q, i) {
+      var on = i === selP || (selE >= 0 && (i === selE || i === (selE + 1) % n));
+      h += '<circle class="pin' + (on ? ' sel' : '') + '" cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="' + (on ? 13 : 11) + '"></circle>';
+    });
+    sp.forEach(function (q, i) {
+      h += '<circle class="hit" data-pin="' + i + '" cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="24"></circle>';
+    });
+    var mlab = '';
+    if (ed.mode === 'measure' && ed.m && ed.m.a) {
+      var ma = toScreen(ed.m.a);
+      if (ed.m.b) {
+        var mb = toScreen(ed.m.b);
+        h += '<line class="mline" x1="' + ma.x.toFixed(1) + '" y1="' + ma.y.toFixed(1) + '" x2="' + mb.x.toFixed(1) + '" y2="' + mb.y.toFixed(1) + '"></line>' +
+          '<rect class="mpt" x="' + (mb.x - 7).toFixed(1) + '" y="' + (mb.y - 7).toFixed(1) + '" width="14" height="14"></rect>';
+        var mly = Math.max(20, Math.min(z.H - 20, (ma.y + mb.y) / 2)), mlx = Math.max(60, Math.min(z.W - 60, (ma.x + mb.x) / 2));
+        mlab = '<span class="mlabel" style="left:' + mlx.toFixed(1) + 'px;top:' + mly.toFixed(1) + 'px">' + lenText(Math.hypot(ed.m.b.x - ed.m.a.x, ed.m.b.y - ed.m.a.y)) + '</span>';
+      }
+      h += '<rect class="mpt" x="' + (ma.x - 7).toFixed(1) + '" y="' + (ma.y - 7).toFixed(1) + '" width="14" height="14"></rect>';
+    }
+    $('sv').innerHTML = h;
+
+    var sign = n >= 3 ? (signedArea(p) >= 0 ? 1 : -1) : 1, lab = '';
+    for (var i = 0; i < edgeCount(); i++) {
+      var s1 = sp[i], s2 = sp[(i + 1) % n], w1 = p[i], w2 = p[(i + 1) % n];
+      var dx = s2.x - s1.x, dy = s2.y - s1.y, L = Math.hypot(dx, dy) || 1;
+      var txt = lenText(Math.hypot(w2.x - w1.x, w2.y - w1.y)), halfW = txt.length * 4.3 + 12;
+      var nx = sign * dy / L, ny = -sign * dx / L, dist = 14 + halfW * Math.abs(nx) + 18 * Math.abs(ny);
+      var lx = (s1.x + s2.x) / 2 + nx * dist, ly = (s1.y + s2.y) / 2 + ny * dist;
+      lx = Math.max(halfW + 2, Math.min(z.W - halfW - 2, lx)); ly = Math.max(20, Math.min(z.H - 20, ly));
+      lab += '<button type="button" class="dim' + (i === selE ? ' sel' : '') + '" data-act="edge" data-edge="' + i + '" style="left:' + lx.toFixed(1) + 'px;top:' + ly.toFixed(1) + 'px">' + txt + '</button>';
+    }
+    $('labels').innerHTML = lab + mlab;
+    $('gridLbl').textContent = 'Grid ' + ft + ' ft';
+    $('areaOut').textContent = areaText(areaOf(p));
+    $('starter').hidden = !(n === 0 && ed.mode === 'move' && !ed.tpl);
+    $('cv').className = 'cv' + (ed.mode === 'measure' ? ' measuring' : '');
+    [['addBtn', 'add'], ['measBtn', 'measure']].forEach(function (b) {
+      var el = $(b[0]), on = ed.mode === b[1];
+      el.className = 'btn' + (on ? ' on' : '');
+      el.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
+  function drawCtx() {
+    var c = $('ctx'), p = pins(), n = p.length;
+    c.className = 'ctx';
+    if (ed.msg) { c.innerHTML = '<p class="hint warn" role="alert">' + esc(ed.msg) + '</p>'; return; }
+    if (ed.tpl === 'rect') {
+      c.className = 'ctx tall';
+      c.innerHTML = '<label class="fld" for="tplWf">Width ft<input class="inp" id="tplWf" type="text" inputmode="numeric" autocomplete="off"></label>' +
+        '<label class="fld" for="tplWi">in<input class="inp" id="tplWi" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></label>' +
+        '<label class="fld" for="tplLf">Length ft<input class="inp" id="tplLf" type="text" inputmode="numeric" autocomplete="off"></label>' +
+        '<label class="fld" for="tplLi">in<input class="inp" id="tplLi" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></label>' +
+        '<button class="btn primary" data-act="tpl-make">Make rectangle</button>';
+      return;
+    }
+    if (ed.mode === 'measure') {
+      if (ed.m && ed.m.a && ed.m.b) {
+        c.innerHTML = '<div class="read"><div class="muted" style="font-size:15px">Distance</div><div class="big" id="measOut">' + lenText(Math.hypot(ed.m.b.x - ed.m.a.x, ed.m.b.y - ed.m.a.y)) + '</div></div>';
+      } else {
+        c.innerHTML = '<p class="hint">' + (ed.m && ed.m.a ? 'Now tap the second point.' : 'Tap two points, or drag from one to the other. It snaps to pins and sides.') + '</p>';
+      }
+      return;
+    }
+    if (ed.sel && ed.sel.type === 'edge' && ed.sel.i < edgeCount()) {
+      var a = p[ed.sel.i], b = p[(ed.sel.i + 1) % n], parts = lenParts(Math.hypot(b.x - a.x, b.y - a.y));
+      c.innerHTML = '<label class="fld" for="lenFt">Feet<input class="inp" id="lenFt" type="text" inputmode="numeric" autocomplete="off" value="' + parts.ft + '"></label>' +
+        '<label class="fld" for="lenIn">Inches<input class="inp" id="lenIn" type="text" inputmode="decimal" autocomplete="off" value="' + parts.inch + '"></label>' +
+        '<button class="btn primary setbtn" data-act="set-len">Set</button>';
+      return;
+    }
+    if (ed.sel && ed.sel.type === 'pin' && ed.sel.i < n) {
+      c.innerHTML = '<div class="row2" style="flex:1"><button class="btn" data-act="square">Square corner</button><button class="btn" data-act="del-pin">Delete pin</button></div>';
+      return;
+    }
+    var hint = ed.mode === 'add'
+      ? (n < 3 ? 'Tap the grid to drop pins around the driveway edge, in order.' : 'Tap the grid to add a pin. Tap on a side to split it.')
+      : (n === 0 ? 'Pick a starting shape above.' : (ed.note || 'Drag a pin to move it. Tap a side length to type the taped measurement.'));
+    c.innerHTML = '<p class="hint">' + hint + '</p>';
+  }
+
+  function evPoint(e) { var r = $('cv').getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+  /* Measure points snap to a pin first, then to the nearest spot on a side, else stay where tapped. */
+  function snapMeasure(sp) {
+    var p = pins(), s = p.map(toScreen), best = -1, bd = 20, v = ed.view;
+    s.forEach(function (q, i) { var d = Math.hypot(q.x - sp.x, q.y - sp.y); if (d <= bd) { bd = d; best = i; } });
+    if (best >= 0) { return { x: p[best].x, y: p[best].y }; }
+    var lim = 14, hit = null;
+    for (var i = 0; i < edgeCount(); i++) {
+      var a = s[i], b = s[(i + 1) % s.length], dx = b.x - a.x, dy = b.y - a.y, L2 = dx * dx + dy * dy;
+      var t = L2 ? Math.max(0, Math.min(1, ((sp.x - a.x) * dx + (sp.y - a.y) * dy) / L2)) : 0;
+      var qx = a.x + t * dx, qy = a.y + t * dy, d = Math.hypot(sp.x - qx, sp.y - qy);
+      if (d <= lim) { lim = d; hit = { x: qx, y: qy }; }
+    }
+    var q = hit || sp;
+    return { x: (q.x - v.ox) / v.s, y: (q.y - v.oy) / v.s };
+  }
+  /* Line a pin up with a neighbor when it lands within half a foot of the neighbor's row or column. */
+  function alignSnap(w, a, b) {
+    [a, b].forEach(function (nb) {
+      if (!nb) { return; }
+      if (Math.abs(w.x - nb.x) < 0.5) { w.x = nb.x; }
+      if (Math.abs(w.y - nb.y) < 0.5) { w.y = nb.y; }
+    });
+    return w;
+  }
+  function onDown(e) {
+    if (e.target.closest('.starter') || e.target.closest('[data-edge]')) { return; }
+    if (e.pointerType === 'mouse' && e.button !== 0) { return; }
+    e.preventDefault();
+    try { $('cv').setPointerCapture(e.pointerId); } catch (err) {}
+    var pt = evPoint(e), pinEl = e.target.closest('[data-pin]');
+    ed.msg = '';
+    if (ed.mode === 'measure') {
+      var second = !!(ed.m && ed.m.a && !ed.m.b);
+      if (!second) { ed.m = { a: snapMeasure(pt), b: null }; }
+      ed.g = { type: 'measure', start: pt, moved: false, second: second };
+      draw(); drawCtx();
+      return;
+    }
+    if (pinEl) { ed.g = { type: 'pin', i: +pinEl.getAttribute('data-pin'), start: pt, moved: false, snap: clone(pins()) }; }
+    else { ed.g = { type: 'pan', start: pt, ox: ed.view.ox, oy: ed.view.oy, moved: false }; }
+  }
+  function onMove(e) {
+    var g = ed && ed.g; if (!g) { return; }
+    var pt = evPoint(e), dx = pt.x - g.start.x, dy = pt.y - g.start.y;
+    if (!g.moved && Math.hypot(dx, dy) < 6) { return; }
+    g.moved = true;
+    if (g.type === 'measure') { ed.m.b = snapMeasure(pt); draw(); drawCtx(); return; }
+    if (g.type === 'pin') {
+      var p = pins(), n = p.length;
+      p[g.i] = alignSnap(toWorld(pt), n > 1 ? p[(g.i + n - 1) % n] : null, n > 1 ? p[(g.i + 1) % n] : null);
+    }
+    else { ed.view.ox = g.ox + dx; ed.view.oy = g.oy + dy; }
+    draw();
+  }
+  function onUp(e) {
+    var g = ed && ed.g; if (!g) { return; }
+    ed.g = null;
+    var pt = evPoint(e);
+    if (g.type === 'measure') {
+      if (g.second || g.moved) { ed.m.b = snapMeasure(pt); }
+    } else if (g.type === 'pin') {
+      if (g.moved) { pushUndo(g.snap); ed.sel = { type: 'pin', i: g.i }; }
+      else { ed.sel = ed.sel && ed.sel.type === 'pin' && ed.sel.i === g.i ? null : { type: 'pin', i: g.i }; }
+    } else if (!g.moved) {
+      if (ed.mode === 'add') { addPin(pt); }
+      else { var i = nearestEdge(pt, 16); ed.sel = i >= 0 ? { type: 'edge', i: i } : null; }
+    }
+    draw(); drawCtx();
+  }
+  function addPin(sp) {
+    var p = pins(), n = p.length, w = toWorld(sp), at = n;
+    if (n >= 2) { var i = nearestEdge(sp, 18); if (i >= 0) { at = i + 1; } }
+    if (at === n && n >= 1) { alignSnap(w, p[n - 1], n > 1 ? p[0] : null); }
+    pushUndo();
+    p.splice(at, 0, w);
+    ed.sel = null;
+  }
+  function makeRect() {
+    var w = num($('tplWf').value) + num($('tplWi').value) / 12, l = num($('tplLf').value) + num($('tplLi').value) / 12;
+    if (w <= 0 || l <= 0) { (w <= 0 ? $('tplWf') : $('tplLf')).focus(); return; }
+    pushUndo();
+    ui.draft.pins = [{ x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: l }, { x: 0, y: l }];
+    ed.tpl = null; ed.sel = null; ed.note = 'Tap a side length to change it, or drag a pin.';
+    fitView(); draw(); drawCtx();
+  }
+  function setLength() {
+    var i = ed.sel.i, p = pins(), n = p.length, a = p[i], b = p[(i + 1) % n];
+    var L = num($('lenFt').value) + num($('lenIn').value) / 12;
+    if (L <= 0) { ed.msg = 'Enter a length above 0.'; drawCtx(); return; }
+    var dx = b.x - a.x, dy = b.y - a.y, L0 = Math.hypot(dx, dy);
+    if (L0 < 1e-6) { return; }
+    var ux = dx / L0, uy = dy / L0, dl = L - L0;
+    pushUndo();
+    /* Stretch: the far pin and every pin at or beyond it along this side move together, so square corners stay square. */
+    p.forEach(function (q, k) {
+      if (k === i) { return; }
+      var t = (q.x - a.x) * ux + (q.y - a.y) * uy;
+      if (t >= L0 - 1e-6) { q.x += ux * dl; q.y += uy * dl; }
+    });
+    draw(); drawCtx();
+  }
+  function squareCorner() {
+    var p = pins(), n = p.length, k = ed.sel.i;
+    if (n < 3) { ed.msg = 'Add at least 3 pins first.'; drawCtx(); return; }
+    var a = p[(k + n - 1) % n], b = p[(k + 1) % n], c = p[k];
+    var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, r = Math.hypot(a.x - b.x, a.y - b.y) / 2;
+    var vx = c.x - mx, vy = c.y - my, vl = Math.hypot(vx, vy);
+    if (vl < 1e-6 || r < 1e-6) { ed.msg = 'Move this pin off the line first.'; drawCtx(); return; }
+    pushUndo();
+    p[k] = { x: mx + vx / vl * r, y: my + vy / vl * r };
+    draw(); drawCtx();
+  }
+
+  /* ---------- actions ---------- */
+  function newDraft() {
+    var s = store.services[0];
+    return { id: null, name: '', date: today(), pins: [], svcId: s.id, svcName: s.name, words: s.words, cents: s.cents, labor: '', expenses: '', extra: '', locked: false, accepted: false };
+  }
+  function patchPrice() {
+    var d = ui.draft, t = totals(d);
+    $('lineAmt').textContent = money(t.line);
+    $('totalAmt').textContent = money(t.total);
+  }
+  /* A job's price is its preset's price: changing it on the job writes it back to the preset. */
+  function setJobRate(cents, fromTyping) {
+    var d = ui.draft, s = findSvc(d.svcId);
+    d.cents = Math.max(0, Math.min(5000, cents));
+    if (s) {
+      s.cents = d.cents; save();
+      var lbl = app.querySelector('.svc.on small'); if (lbl) { lbl.textContent = rateLabel(s.cents); }
+    }
+    if (!fromTyping) { $('jobRate').value = (d.cents / 100).toFixed(2); }
+    ui.dirty = true; patchPrice();
+  }
+  function leaveSketch() {
+    var back = ui.draft && ui.draft.id ? 'view' : 'jobs';
+    ui.draft = null; ui.dirty = false; go(back);
+  }
+
+  function act(name, el) {
+    var j = findJob(ui.jobId), s;
+    switch (name) {
+      case 'home': go('jobs'); break;
+      case 'services': go('services'); break;
+      case 'new': ui.draft = newDraft(); ui.dirty = false; go('sketch'); break;
+      case 'open': ui.jobId = el.getAttribute('data-id'); go('view'); break;
+      case 'reset':
+        sheet('Reset sample data?', 'This removes every job and service saved in this browser and puts the two samples back.', 'Reset', 'Cancel', function () { store = seed(); save(); go('jobs'); });
+        break;
+
+      case 'svc-pick': ui.svcId = el.getAttribute('data-id'); render(); break;
+      case 'svc-new':
+        s = { id: 's' + (store.nextId++), name: 'New service', cents: 50, words: '' };
+        store.services.push(s); ui.svcId = s.id; save(); render();
+        var nm = $('svcName'); if (nm) { nm.focus(); nm.select(); }
+        break;
+      case 'svc-up': case 'svc-down':
+        s = findSvc(ui.svcId);
+        s.cents = Math.max(0, Math.min(5000, s.cents + (name === 'svc-up' ? 5 : -5)));
+        save(); $('svcPrice').value = (s.cents / 100).toFixed(2);
+        break;
+      case 'svc-del':
+        s = findSvc(ui.svcId);
+        sheet('Delete ' + (s.name || 'this service') + '?', 'Jobs already saved keep their price and wording.', 'Delete', 'Cancel', function () {
+          store.services = store.services.filter(function (x) { return x.id !== s.id; });
+          ui.svcId = store.services[0].id; save(); render();
+        });
+        break;
+
+      case 'sketch-back':
+        if (ui.dirty) { sheet('Leave without saving?', 'Changes to this job since it was last saved will be lost.', 'Leave', 'Keep editing', leaveSketch); }
+        else { leaveSketch(); }
+        break;
+      case 'zoom-in': zoomBy(1.25); break;
+      case 'zoom-out': zoomBy(0.8); break;
+      case 'zoom-fit': fitView(); draw(); break;
+      case 'add-mode': ed.mode = ed.mode === 'add' ? 'move' : 'add'; ed.tpl = null; ed.m = null; ed.sel = null; ed.msg = ''; draw(); drawCtx(); break;
+      case 'measure-mode': ed.mode = ed.mode === 'measure' ? 'move' : 'measure'; ed.tpl = null; ed.m = null; ed.sel = null; ed.msg = ''; draw(); drawCtx(); break;
+      case 'tpl-rect': ed.tpl = 'rect'; ed.msg = ''; draw(); drawCtx(); break;
+      case 'tpl-make': makeRect(); break;
+      case 'tpl-l':
+        pushUndo();
+        ui.draft.pins = [{ x: 0, y: 0 }, { x: 24, y: 0 }, { x: 24, y: 18 }, { x: 12, y: 18 }, { x: 12, y: 44 }, { x: 0, y: 44 }];
+        ed.sel = null; ed.note = 'Tap each side length and type the real measurement.';
+        fitView(); draw(); drawCtx();
+        break;
+      case 'tpl-own': ed.mode = 'add'; draw(); drawCtx(); break;
+      case 'undo':
+        if (ed.undo.length) { ui.draft.pins = ed.undo.pop(); ed.sel = null; ed.m = null; ed.msg = ''; draw(); drawCtx(); }
+        break;
+      case 'clear':
+        if (!pins().length) { ed.mode = 'move'; ed.tpl = null; ed.m = null; draw(); drawCtx(); break; }
+        sheet('Clear the sketch?', 'All pins are removed. Undo brings them back.', 'Clear', 'Cancel', function () {
+          pushUndo(); ui.draft.pins = []; ed.sel = null; ed.mode = 'move'; ed.tpl = null; ed.m = null; ed.note = ''; ed.msg = ''; draw(); drawCtx();
+        });
+        break;
+      case 'edge': ed.msg = ''; ed.sel = { type: 'edge', i: +el.getAttribute('data-edge') }; draw(); drawCtx(); break;
+      case 'set-len': setLength(); break;
+      case 'square': squareCorner(); break;
+      case 'del-pin': pushUndo(); pins().splice(ed.sel.i, 1); ed.sel = null; draw(); drawCtx(); break;
+      case 'to-price':
+        if (pins().length < 3) { ed.msg = 'Drop at least 3 pins to make a shape.'; drawCtx(); break; }
+        go('price');
+        break;
+
+      case 'to-sketch': go('sketch'); break;
+      case 'job-svc':
+        s = findSvc(el.getAttribute('data-id'));
+        if (s) { ui.draft.svcId = s.id; ui.draft.svcName = s.name; ui.draft.words = s.words; ui.draft.cents = s.cents; ui.dirty = true; render(); }
+        break;
+      case 'rate-up': case 'rate-down':
+        setJobRate(ui.draft.cents + (name === 'rate-up' ? 5 : -5), false);
+        break;
+      case 'save-job':
+        var d = ui.draft;
+        d.name = (d.name || '').trim() || 'Job ' + fmtDate(d.date);
+        if (d.id) { store.jobs = store.jobs.map(function (x) { return x.id === d.id ? d : x; }); }
+        else { d.id = 'j' + (store.nextId++); store.jobs.unshift(d); }
+        save(); ui.jobId = d.id; ui.draft = null; ui.dirty = false; go('view');
+        break;
+
+      case 'ask-unlock':
+        sheet('Unlock this job?', 'You can change the sketch and the price again. Lock it when you are done.', 'Unlock', 'Keep locked', function () { j.locked = false; save(); render(); });
+        break;
+      case 'lock': j.locked = true; save(); render(); break;
+      case 'edit-sketch': ui.draft = clone(j); ui.dirty = false; go('sketch'); break;
+      case 'edit-price': ui.draft = clone(j); ui.dirty = false; go('price'); break;
+      case 'ask-delete':
+        sheet('Delete ' + j.name + '?', 'This job is removed from the list for good.', 'Delete', 'Cancel', function () {
+          store.jobs = store.jobs.filter(function (x) { return x.id !== j.id; }); save(); go('jobs');
+        });
+        break;
+      case 'show-quote': go('quote'); break;
+      case 'close-quote': go('view'); break;
+      case 'accept': j.accepted = true; save(); render(); break;
+
+      case 'sheet-yes': var fn = sheetYes; closeSheet(); if (fn) { fn(); } break;
+      case 'sheet-no': closeSheet(); break;
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]');
+    if (b) { act(b.getAttribute('data-act'), b); }
+  });
+  document.addEventListener('input', function (e) {
+    var f = e.target.getAttribute && e.target.getAttribute('data-f');
+    if (!f) { return; }
+    var v = e.target.value, s;
+    if (f === 'jobName') { ui.draft.name = v; ui.dirty = true; }
+    else if (f === 'labor' || f === 'expenses' || f === 'extra') { ui.draft[f] = v; ui.dirty = true; patchPrice(); }
+    else if (f === 'jobRate') { setJobRate(Math.round(num(v) * 100), true); }
+    else if (f === 'svcPrice') { s = findSvc(ui.svcId); if (s) { s.cents = Math.max(0, Math.min(5000, Math.round(num(v) * 100))); save(); } }
+    else if (f === 'svcName' || f === 'svcWords') {
+      s = findSvc(ui.svcId); if (!s) { return; }
+      if (f === 'svcName') {
+        s.name = v;
+        var chip = app.querySelector('.svc.on'); if (chip) { chip.textContent = v || 'New service'; }
+      } else { s.words = v; }
+      save();
+    }
+  });
+  document.addEventListener('change', function (e) {
+    var f = e.target.getAttribute && e.target.getAttribute('data-f');
+    if (f === 'jobRate' && ui.draft) { e.target.value = (ui.draft.cents / 100).toFixed(2); }
+    if (f === 'svcPrice') { var s = findSvc(ui.svcId); if (s) { e.target.value = (s.cents / 100).toFixed(2); } }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && (e.target.id === 'lenFt' || e.target.id === 'lenIn')) { e.preventDefault(); setLength(); }
+    if (e.key === 'Enter' && /^tpl[WL][fi]$/.test(e.target.id || '')) { e.preventDefault(); makeRect(); }
+    if (e.key === 'Escape' && sheetHost.firstChild) { closeSheet(); }
+  });
+
+  render();
+})();
+</script>
+
+</body></html>
